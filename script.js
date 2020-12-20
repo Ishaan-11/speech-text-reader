@@ -1,10 +1,10 @@
-const toggleBtn = document.getElementById('toggle'),
-  closeBtn = document.getElementById('close'),
+const main = document.querySelector('main'),
   voicesSelect = document.getElementById('voices'),
   textarea = document.getElementById('text'),
-  readBtn = document.getElementById('text'),
-  main = document.querySelector('main');
-
+  readBtn = document.getElementById('read'),
+  toggleBtn = document.getElementById('toggle'),
+  closeBtn = document.getElementById('close');
+  
 const data = [
   {
     image: './img/drink.jpg',
@@ -71,5 +71,72 @@ function createBox(item) {
     <p class="info">${text}</p>
   `;
 
+  box.addEventListener('click', () => {
+    setTextMessage(text);
+    speakText();
+
+    // Add active effect
+    box.classList.add('active');
+    setTimeout(() => box.classList.remove('active'), 800);
+  });
+
   main.appendChild(box);
 }
+
+// Init speech synth
+const message = new SpeechSynthesisUtterance();
+
+// Store voices
+let voices = [];
+
+function getVoices() {
+  voices = speechSynthesis.getVoices();
+
+  voices.forEach(voice => {
+    const option = document.createElement('option');
+
+    option.value = voice.name;
+    option.innerText = `${voice.name} ${voice.lang}`;
+
+    voicesSelect.appendChild(option);
+  });
+}
+
+// Set text
+function setTextMessage(text) {
+  message.text = text;
+}
+
+// Speak text
+function speakText() {
+  speechSynthesis.speak(message);
+}
+
+// Set voice
+function setVoice(e) {
+  message.voice = voices.find(voice => voice.name === e.target.value);
+}
+
+// Voices changed
+speechSynthesis.addEventListener('voiceschanged', getVoices);
+
+// Toggle text box
+toggleBtn.addEventListener('click', () =>
+  document.getElementById('text-box').classList.toggle('show')
+);
+
+// Close button
+closeBtn.addEventListener('click', () =>
+  document.getElementById('text-box').classList.remove('show')
+);
+
+// Change voice
+voicesSelect.addEventListener('change', setVoice);
+
+// Read text button
+readBtn.addEventListener('click', () => {
+  setTextMessage(textarea.value);
+  speakText();
+});
+
+getVoices();
